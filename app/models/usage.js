@@ -52,8 +52,14 @@ let UsageSchema = new Schema({
       remark: String,
       quantity: Number,
       perUsageQTY: Number,
-      perAmount: Number,
-      totalAmount: Number,
+      perAmount: {
+        type: Number,
+        default: 0,
+      },
+      totalAmount: {
+        type: Number,
+        default: 0,
+      },
     },
   ],
   isDeleted: {
