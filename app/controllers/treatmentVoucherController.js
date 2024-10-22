@@ -15,6 +15,7 @@ const patient = require("../models/patient");
 const { default: mongoose } = require("mongoose");
 const Comission = require("../models/comission");
 const nurse = require("../models/nurse");
+const MemberLevel = require("../models/memberLevel");
 
 exports.deleteMS = async (req, res) => {
   try {
@@ -434,12 +435,10 @@ exports.getRelatedTreatmentVoucher = async (req, res) => {
     return res.status(200).send({ success: true, data: result });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .send({
-        error: true,
-        message: "An Error Occured While Fetching Related Treatment Vouchers",
-      });
+    return res.status(500).send({
+      error: true,
+      message: "An Error Occured While Fetching Related Treatment Vouchers",
+    });
   }
 };
 
@@ -539,14 +538,7 @@ exports.createTreatmentVoucher = async (req, res, next) => {
   try {
     const newTreatmentVoucher = new TreatmentVoucher(data);
     const result = await newTreatmentVoucher.save();
-    const patientData = await patient.find({ _id: data.relatedPatient._id });
-    const resultUpdate = await patient.findOneAndUpdate(
-      { _id: data.relatedPatient._id },
-      {
-        totalAmount: patientData[0].totalAmount + data.totalPaidAmount,
-      },
-      { new: true }
-    );
+
     res.status(200).send({
       message: "TreatmentVoucher create success",
       success: true,
@@ -1270,12 +1262,10 @@ exports.filterTreatmentVoucher = async (req, res, next) => {
     if (relatedDoctor) query.relatedDoctor = relatedDoctor;
     if (relatedPatient) query.relatedPatient = relatedPatient;
     if (Object.keys(query).length === 0)
-      return res
-        .status(404)
-        .send({
-          error: true,
-          message: "Please Specify A Query To Use This Function",
-        });
+      return res.status(404).send({
+        error: true,
+        message: "Please Specify A Query To Use This Function",
+      });
     const result = await TreatmentVoucher.find(query).populate(
       "createdBy relatedTreatment relatedAppointment relatedPatient payment relatedTreatmentSelection "
     );

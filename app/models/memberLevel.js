@@ -15,10 +15,6 @@ let MemberLevelSchema = new Schema({
     type: Number,
     default: 0,
   },
-  amount: {
-    type: Number,
-    default: 0,
-  },
   type: {
     type: String,
     enum: ["PerVoucherAmount", "TotalAmount"],
@@ -26,6 +22,14 @@ let MemberLevelSchema = new Schema({
   },
   description: {
     type: String,
+  },
+  totalAmount: {
+    type: Number,
+    default: 0,
+  },
+  isActive: {
+    type: Boolean,
+    default: false,
   },
   isDeleted: {
     type: Boolean,
