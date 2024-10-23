@@ -79,7 +79,11 @@ let PatientSchema = new Schema({
   relatedMemberLevel: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "MemberLevel",
-  },
+  }, // to show member level with totalAmount
+  discountWithMemberLevel: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "MemberLevel",
+  }, // to show member level chosen by customer
   conditionAmount: {
     type: Number,
   },

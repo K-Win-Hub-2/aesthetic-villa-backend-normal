@@ -9,7 +9,7 @@ const config = {
       name: "Clinic-Denovo",
     },
     //db: 'mongodb://127.0.0.1:3221',
-    db: "mongodb+srv://pyaephyokwintech:5NhJPFwcnWwhBh97@cluster0.r1la8.mongodb.net/Asethetic-Villa",
+    db: "mongodb+srv://pyaephyokwintech:5NhJPFwcnWwhBh97@cluster0.r1la8.mongodb.net/aesthetic-villa-test",
     //db: 'mongodb+srv://dbuser:P7qBNveg8bVO1d2z@cluster0.85ozwwv.mongodb.net/cherry-k?retryWrites=true&w=majority',
     uploadsURI: [
       "./uploads/cherry-k/img",
@@ -40,7 +40,7 @@ const config = {
     },
     //db: 'mongodb://127.0.0.1:3221',
     //db: 'mongodb+srv://dbuser:P7qBNveg8bVO1d2z@cluster0.85ozwwv.mongodb.net/cherry-k?retryWrites=true&w=majority',
-    db: "mongodb+srv://pyaephyokwintech:5NhJPFwcnWwhBh97@cluster0.r1la8.mongodb.net/Asethetic-Villa",
+    db: "mongodb+srv://pyaephyokwintech:5NhJPFwcnWwhBh97@cluster0.r1la8.mongodb.net/aesthetic-villa-test",
     uploadsURI: [
       "./uploads/cherry-k/img",
       "./uploads/cherry-k/excel",

@@ -296,27 +296,35 @@ exports.createMultiTreatmentSelection = async (req, res, next) => {
           image: imgPath.split("\\")[2],
         };
         const attachResult = await Attachment.create(attachData);
-        console.log(attachResult, "result");
+        // console.log(attachResult, "result");
         attachID = attachResult._id;
       }
     }
     const patientData = await Patient.find({ _id: relatedPatient });
-    const memLevelRes = await MemberLevel.find({ isDeleted });
-
-    const totalAmountAll = patientData[0].totalAmount + data.totalPaidAmount;
+    // console.log(patientData, "patientData");
+    const memLevelRes = await MemberLevel.find({
+      isDeleted: false,
+      isActive: true,
+      type: "TotalAmount",
+    });
+    // console.log(patientData[0].totalAmount, "patientData[0].totalAmount");
+    // console.log(data.totalPaidAmount, "data.totalPaidAmount");
+    const totalAmountAll =
+      parseInt(patientData[0].totalAmount) + parseInt(data.totalPaidAmount);
+    // console.log(totalAmountAll, "totalAmountAll");
     const filterLevel = memLevelRes.filter(
       (el) => el.totalAmount <= totalAmountAll
     );
-    console.log(filterLevel, "filterLevel");
+    // console.log(filterLevel, "filterLevel");
     const resultUpdate = await Patient.findOneAndUpdate(
       { _id: relatedPatient },
       {
         totalAmount: totalAmountAll,
-        relatedMemberLevel: filterLevel[0]._id,
+        relatedMemberLevel: filterLevel[filterLevel.length - 1]._id,
       },
       { new: true }
     );
-    console.log(resultUpdate, "resultUpdate");
+    // console.log(resultUpdate, "resultUpdate");
     const patientUpdate = await Patient.findOneAndUpdate(
       { _id: relatedPatient },
       {
