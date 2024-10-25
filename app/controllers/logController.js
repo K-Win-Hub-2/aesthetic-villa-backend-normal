@@ -178,10 +178,10 @@ exports.createUsage = async (req, res) => {
 
       if (machine !== undefined) {
         for (const e of machine) {
-          if (e.stock < e.actual) {
+          if (e.quantity < e.actual) {
             machineError.push(e);
-          } else if (e.stock > e.actual) {
-            let totalUnit = e.stock - e.actual;
+          } else if (e.quantity > e.actual) {
+            let totalUnit = e.quantity - e.actual;
             const result = await Machine.find({ _id: e.item_id });
             const from = result[0].fromUnit;
             const to = result[0].toUnit;
@@ -199,7 +199,7 @@ exports.createUsage = async (req, res) => {
               relatedTreatmentSelection: relatedTreatmentSelection,
               relatedAppointment: relatedAppointment,
               relatedMachine: e.item_id,
-              currentQty: e.stock,
+              currentQty: e.quantity,
               actualQty: e.actual,
               finalQty: totalUnit,
               type: "Usage",
