@@ -186,7 +186,8 @@ exports.createUsage = async (req, res) => {
             const from = result[0].fromUnit;
             const to = result[0].toUnit;
             const currentQty = (from * totalUnit) / to;
-            const totalAmount = result[0].totalMachineCost + e.totalAmount;
+            const totalAmount =
+              parseInt(result[0].totalMachineCost) + parseInt(e.perAmount); //use e.totalAmount
             machineFinished.push(e);
             const resultUpdate = await Machine.findOneAndUpdate(
               { _id: e.item_id },
