@@ -186,14 +186,11 @@ exports.createUsage = async (req, res) => {
             const from = result[0].fromUnit;
             const to = result[0].toUnit;
             const currentQty = (from * totalUnit) / to;
-            const totalAmount =
-              parseInt(result[0].totalMachineCost) + parseInt(e.perAmount); //use e.totalAmount
+            const totalAmount = parseInt(result[0].totalMachineCost) + 1000; //use e.totalAmount
             machineFinished.push(e);
             const resultUpdate = await Machine.findOneAndUpdate(
               { _id: e.item_id },
               {
-                totalUnit: totalUnit,
-                currentQuantity: currentQty,
                 totalMachineCost: totalAmount,
               },
               { new: true }
@@ -484,14 +481,14 @@ exports.getStockTotalUnit = async (req, res) => {
       accessoryResults = await AccessoryItem.find({
         _id: { $in: data.accessoryItems },
       });
-    if (data.machine)
-      var machine = await Machine.find({ _id: { $in: data.machine } });
+    if (data.machines)
+      var machine = await Machine.find({ _id: { $in: data.machines } });
     return res.status(200).send({
       success: true,
       procedureItems: procedureItems,
       medicineItems: medicineItems,
       accessoryItems: accessoryResults,
-      machine: machine,
+      machines: machine,
     });
   } catch (error) {
     return res.status(500).send({ error: true, message: error.message });
