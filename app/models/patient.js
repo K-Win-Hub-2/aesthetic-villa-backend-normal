@@ -6,6 +6,9 @@ const Schema = mongoose.Schema;
 const validator = require("validator");
 
 let PatientSchema = new Schema({
+  code: {
+    type: String,
+  },
   name: {
     type: String,
     required: true,
@@ -31,6 +34,9 @@ let PatientSchema = new Schema({
     enum: ["Male", "Female"],
   },
   address: {
+    type: String,
+  },
+  township: {
     type: String,
   },
   occupation: {

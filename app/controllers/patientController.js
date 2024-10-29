@@ -229,39 +229,50 @@ exports.createPatient = async (req, res, next) => {
   let files = req.files;
   try {
     //prepare CUS-ID
-    const latestDocument = await Patient.find({}, { seq: 1 })
-      .sort({ _id: -1 })
-      .limit(1)
-      .exec();
-    console.log(latestDocument);
-    const initials = getInitialsInUpperCase(data.name);
-    if (latestDocument.length === 0) {
-      data = { ...data, seq: "1", patientID: "CUS-" + initials + "-1" };
-    } // if seq is undefined set initial patientID and seq
-    console.log(data);
-    if (latestDocument.length) {
-      const increment = latestDocument[0].seq + 1;
-      data = {
-        ...data,
-        patientID: "CUS-" + initials + "-" + increment,
-        seq: increment,
-      };
-    }
+    // const latestDocument = await Patient.find({}, { seq: 1 })
+    //   .sort({ _id: -1 })
+    //   .limit(1)
+    //   .exec();
+
+    // console.log(latestDocument);
+
+    // const initials = getInitialsInUpperCase(data.name);
+    // if (latestDocument.length === 0) {
+    //   data = { ...data, seq: "1", patientID: "CUS-" + initials + "-1" };
+    // } // if seq is undefined set initial patientID and seq
+
+    // console.log(data);
+
+    // if (latestDocument.length) {
+    //   const increment = latestDocument[0].seq + 1;
+    //   data = {
+    //     ...data,
+    //     patientID: "CUS-" + initials + "-" + increment,
+    //     seq: increment,
+    //   };
+    // }
+
     console.log(files.img, "files.img");
+
     if (files.img) {
       let imgPath = files.img[0].path.split("cherry-k")[1];
+
       const attachData = {
         fileName: files.img[0].originalname,
         imgUrl: imgPath,
         image: imgPath.split("\\")[2],
       };
+
       const newAttachment = new Attachment(attachData);
       const attachResult = await newAttachment.save();
+
       data = { ...data, img: attachResult._id.toString() };
     } //prepare img and save it into attachment schema
 
     const newPatient = new Patient(data);
+
     const result = await newPatient.save();
+
     res.status(200).send({
       message: "Patient create success",
       success: true,
