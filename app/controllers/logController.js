@@ -186,12 +186,13 @@ exports.createUsage = async (req, res) => {
             const from = result[0].fromUnit;
             const to = result[0].toUnit;
             const currentQty = (from * totalUnit) / to;
-            const totalAmount = parseInt(result[0].totalMachineCost) + 1000; //use e.totalAmount
+            const totalMachineAmount =
+              parseInt(result[0].totalMachineCost) + 1000; //use e.totalAmount
             machineFinished.push(e);
             const resultUpdate = await Machine.findOneAndUpdate(
               { _id: e.item_id },
               {
-                totalMachineCost: totalAmount,
+                totalMachineCost: totalMachineAmount,
               },
               { new: true }
             );
@@ -205,7 +206,7 @@ exports.createUsage = async (req, res) => {
               type: "Usage",
               createdBy: createdBy,
               fromAmount: result[0].totalMachineCost,
-              toAmount: totalAmount,
+              toAmount: totalMachineAmount,
             });
             const logResult = await Log.create({
               relatedTreatmentSelection: relatedTreatmentSelection,

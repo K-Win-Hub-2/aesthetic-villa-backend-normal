@@ -301,26 +301,27 @@ exports.createMultiTreatmentSelection = async (req, res, next) => {
       }
     }
     const patientData = await Patient.find({ _id: relatedPatient });
-    // console.log(patientData, "patientData");
+    console.log(patientData, "patientData");
     const memLevelRes = await MemberLevel.find({
       isDeleted: false,
       isActive: true,
       type: "TotalAmount",
     });
     // console.log(patientData[0].totalAmount, "patientData[0].totalAmount");
-    // console.log(data.totalPaidAmount, "data.totalPaidAmount");
+    console.log(memLevelRes, "memLevelRes");
+    console.log(data, "data");
     const totalAmountAll =
-      parseInt(patientData[0].totalAmount) + parseInt(data.totalPaidAmount);
-    // console.log(totalAmountAll, "totalAmountAll");
+      parseInt(patientData[0].totalPaidAmount) + parseInt(data.totalPaidAmount);
+    console.log(totalAmountAll, "totalAmountAll");
     const filterLevel = memLevelRes.filter(
       (el) => el.totalAmount <= totalAmountAll
     );
-    // console.log(filterLevel, "filterLevel");
+    console.log(filterLevel, "filterLevel");
     const resultUpdate = await Patient.findOneAndUpdate(
       { _id: relatedPatient },
       {
         totalAmount: totalAmountAll,
-        relatedMemberLevel: filterLevel[filterLevel.length - 1]._id,
+        relatedMemberLevel: filterLevel[filterLevel.length - 1]?._id,
       },
       { new: true }
     );
