@@ -310,16 +310,18 @@ exports.createMultiTreatmentSelection = async (req, res, next) => {
     // console.log(patientData[0].totalAmount, "patientData[0].totalAmount");
     console.log(memLevelRes, "memLevelRes");
     console.log(data, "data");
-
+    const totalAmountAll =
+      parseInt(patientData[0].totalPaidAmount) + parseInt(data.totalPaidAmount);
+    console.log(totalAmountAll, "totalAmountAll");
     const filterLevel = memLevelRes.filter(
-      (el) => el.totalAmount <= parseInt(patientData[0].totalPaidAmount)
+      (el) => el.totalAmount <= totalAmountAll
     );
     console.log(filterLevel, "filterLevel");
 
     const resultUpdate = await Patient.findOneAndUpdate(
       { _id: relatedPatient },
       {
-        totalAmount: parseInt(data.totalPaidAmount),
+        totalAmount: totalAmountAll,
         relatedMemberLevel: filterLevel[filterLevel.length - 1]?._id,
       },
       { new: true }
