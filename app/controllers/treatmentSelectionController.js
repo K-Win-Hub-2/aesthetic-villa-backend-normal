@@ -317,11 +317,12 @@ exports.createMultiTreatmentSelection = async (req, res, next) => {
       (el) => el.totalAmount <= totalAmountAll
     );
     console.log(filterLevel, "filterLevel");
+
+    Patient.relatedMemberLevel = filterLevel[filterLevel.length - 1]?._id;
     const resultUpdate = await Patient.findOneAndUpdate(
       { _id: relatedPatient },
       {
         totalAmount: totalAmountAll,
-        relatedMemberLevel: filterLevel[filterLevel.length - 1]?._id,
       },
       { new: true }
     );
