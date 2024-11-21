@@ -311,7 +311,7 @@ exports.createMultiTreatmentSelection = async (req, res, next) => {
     console.log(memLevelRes, "memLevelRes");
     console.log(data, "data");
     const totalAmountAll =
-      parseInt(patientData[0].totalPaidAmount) + parseInt(data.totalPaidAmount);
+      parseInt(patientData[0].totalAmount) + parseInt(data.totalPaidAmount);
     console.log(totalAmountAll, "totalAmountAll");
     const filterLevel = memLevelRes.filter(
       (el) => el.totalAmount <= totalAmountAll
