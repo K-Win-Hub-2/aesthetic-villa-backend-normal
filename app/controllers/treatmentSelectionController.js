@@ -319,9 +319,7 @@ exports.createMultiTreatmentSelection = async (req, res, next) => {
     const resultUpdate = await Patient.findOneAndUpdate(
       { _id: relatedPatient },
       {
-        totalAmount:
-          parseInt(patientData[0].totalPaidAmount) +
-          parseInt(data.totalPaidAmount),
+        totalAmount: parseInt(data.totalPaidAmount),
         relatedMemberLevel: filterLevel[filterLevel.length - 1]?._id,
       },
       { new: true }
