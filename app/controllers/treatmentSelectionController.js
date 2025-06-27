@@ -232,6 +232,7 @@ exports.createMultiTreatmentSelection = async (req, res, next) => {
   let files = req.files;
   let data = req.body;
   let createdBy = req.credentials.id;
+  console.log(data.isMemberDiscount, "mem dis");
   // let { relatedPatient, totalAmount, totalDiscount, totalPaidAmount, multiTreatment, paidAmount, relatedBank, relatedCash, relatedAppointment, bankType, paymentType, remark, relatedDiscount, relatedDoctor } = req.body
   let {
     selections,
@@ -257,6 +258,7 @@ exports.createMultiTreatmentSelection = async (req, res, next) => {
     relatedDoctor,
     relatedTherapist,
     secondAmount,
+    isMemberDiscount,
   } = req.body;
 
   let tvcCreate = false;
@@ -319,7 +321,10 @@ exports.createMultiTreatmentSelection = async (req, res, next) => {
     const resultUpdate = await Patient.findOneAndUpdate(
       { _id: relatedPatient },
       {
-        relatedMemberLevel: filterLevel[filterLevel.length - 1]?._id,
+        relatedMemberLevel:
+          filterLevel.length === 1
+            ? filterLevel[0]?._id
+            : filterLevel[filterLevel.length - 1]?._id,
       },
 
       { new: true }
@@ -389,6 +394,7 @@ exports.createMultiTreatmentSelection = async (req, res, next) => {
         balance: req.body.balance,
         code: req.body.VoucherCode,
         seq: req.body.seq,
+        isMemberDiscount: req.body.isMemberDiscount,
       };
       console.log(dataTVC);
       dataTVC.multiTreatment = parsedMulti;

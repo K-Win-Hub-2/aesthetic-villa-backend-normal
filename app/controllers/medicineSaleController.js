@@ -1,23 +1,40 @@
-'use strict';
-const MedicineSale = require('../models/medicineSale');
-const Transaction = require('../models/transaction');
-const Accounting = require('../models/accountingList');
-const Patient = require('../models/patient');
-const MedicineItems = require('../models/medicineItem');
-const Log = require('../models/log');
+"use strict";
+const MedicineSale = require("../models/medicineSale");
+const Transaction = require("../models/transaction");
+const Accounting = require("../models/accountingList");
+const Patient = require("../models/patient");
+const MedicineItems = require("../models/medicineItem");
+const Log = require("../models/log");
+const MemberLevel = require("../models/memberLevel");
 exports.getwithExactDate = async (req, res) => {
   try {
     let { exact } = req.query;
     const date = new Date(exact);
-    const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()); // Set start date to the beginning of the day
-    const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1); // Set end date to the beginning of the next day
-    let result = await MedicineSale.find({ createdAt: { $gte: startDate, $lt: endDate } }).populate('relatedPatient relatedTransaction relatedCash').populate('relatedAppointment').populate('medicineItems.item_id').populate('relatedTreatment').populate('createdBy')
-    if (result.length === 0) return res.status(404).send({ error: true, message: 'Not Found!' })
-    return res.status(200).send({ success: true, data: result })
+    const startDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    ); // Set start date to the beginning of the day
+    const endDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate() + 1
+    ); // Set end date to the beginning of the next day
+    let result = await MedicineSale.find({
+      createdAt: { $gte: startDate, $lt: endDate },
+    })
+      .populate("relatedPatient relatedTransaction relatedCash")
+      .populate("relatedAppointment")
+      .populate("medicineItems.item_id")
+      .populate("relatedTreatment")
+      .populate("createdBy");
+    if (result.length === 0)
+      return res.status(404).send({ error: true, message: "Not Found!" });
+    return res.status(200).send({ success: true, data: result });
   } catch (error) {
-    return res.status(500).send({ error: true, message: error.message })
+    return res.status(500).send({ error: true, message: error.message });
   }
-}
+};
 
 exports.listAllMedicineSales = async (req, res) => {
   let { keyword, role, limit, skip } = req.query;
@@ -28,25 +45,35 @@ exports.listAllMedicineSales = async (req, res) => {
     skip = +skip || 0;
     let query = { isDeleted: false },
       regexKeyword;
-    role ? (query['role'] = role.toUpperCase()) : '';
+    role ? (query["role"] = role.toUpperCase()) : "";
     keyword && /\w/.test(keyword)
-      ? (regexKeyword = new RegExp(keyword, 'i'))
-      : '';
-    regexKeyword ? (query['name'] = regexKeyword) : '';
-    let result = await MedicineSale.find(query).populate('relatedPatient').populate('relatedAppointment').populate('medicineItems.item_id').populate('relatedTreatment relatedBank relatedCash').populate('createdBy').populate({
-      path: 'relatedTransaction',
-      populate: [{
-        path: 'relatedAccounting',
-        model: 'AccountingLists'
-      }, {
-        path: 'relatedBank',
-        model: 'AccountingLists'
-      }, {
-        path: 'relatedCash',
-        model: 'AccountingLists'
-      }]
-    });
-    console.log(result)
+      ? (regexKeyword = new RegExp(keyword, "i"))
+      : "";
+    regexKeyword ? (query["name"] = regexKeyword) : "";
+    let result = await MedicineSale.find(query)
+      .populate("relatedPatient")
+      .populate("relatedAppointment")
+      .populate("medicineItems.item_id")
+      .populate("relatedTreatment relatedBank relatedCash")
+      .populate("createdBy")
+      .populate({
+        path: "relatedTransaction",
+        populate: [
+          {
+            path: "relatedAccounting",
+            model: "AccountingLists",
+          },
+          {
+            path: "relatedBank",
+            model: "AccountingLists",
+          },
+          {
+            path: "relatedCash",
+            model: "AccountingLists",
+          },
+        ],
+      });
+    console.log(result);
     count = await MedicineSale.find(query).count();
     const division = count / limit;
     page = Math.ceil(division);
@@ -62,50 +89,66 @@ exports.listAllMedicineSales = async (req, res) => {
       list: result,
     });
   } catch (e) {
-    console.log(e)
+    console.log(e);
     return res.status(500).send({ error: true, message: e.message });
   }
 };
 
 exports.getMedicineSale = async (req, res) => {
-  const result = await MedicineSale.find({ _id: req.params.id, isDeleted: false }).populate('relatedPatient relatedTransaction').populate('relatedAppointment').populate('medicineItems.item_id').populate('relatedTreatment').populate('createdBy')
+  const result = await MedicineSale.find({
+    _id: req.params.id,
+    isDeleted: false,
+  })
+    .populate("relatedPatient relatedTransaction")
+    .populate("relatedAppointment")
+    .populate("medicineItems.item_id")
+    .populate("relatedTreatment")
+    .populate("createdBy");
   if (!result)
-    return res.status(500).json({ error: true, message: 'No Record Found' });
+    return res.status(500).json({ error: true, message: "No Record Found" });
   return res.status(200).send({ success: true, data: result });
 };
 
 exports.createCode = async (req, res, next) => {
-  let data = {}
+  let data = {};
   try {
-    const latestDocument = await MedicineSale.find({}, { seq: 1 }).sort({ _id: -1 }).limit(1).exec();
-    if (latestDocument.length == 0) data = { ...data, seq: 1, voucherCode: "MVC-1" } // if seq is undefined set initial patientID and seq
+    const latestDocument = await MedicineSale.find({}, { seq: 1 })
+      .sort({ _id: -1 })
+      .limit(1)
+      .exec();
+    if (latestDocument.length == 0)
+      data = { ...data, seq: 1, voucherCode: "MVC-1" }; // if seq is undefined set initial patientID and seq
     if (latestDocument.length) {
-      const increment = latestDocument[0].seq + 1
-      data = { ...data, voucherCode: "MVC-" + increment, seq: increment }
+      const increment = latestDocument[0].seq + 1;
+      data = { ...data, voucherCode: "MVC-" + increment, seq: increment };
     }
     return res.status(200).send({
       success: true,
-      data: data
-    })
+      data: data,
+    });
   } catch (err) {
     return res.status(500).send({
       error: true,
-      message: err
-    })
+      message: err,
+    });
   }
-}
+};
 
 exports.createMedicineSale = async (req, res, next) => {
   let data = req.body;
   const { medicineItems } = req.body;
-  let createdBy = req.credentials.id
+  let createdBy = req.credentials.id;
   try {
     //prepare CUS-ID
-    const latestDocument = await MedicineSale.find({}, { seq: 1 }).sort({ _id: -1 }).limit(1).exec();
-    if (latestDocument.length == 0) data = { ...data, seq: 1, voucherCode: "MVC-1" } // if seq is undefined set initial patientID and seq
+    const latestDocument = await MedicineSale.find({}, { seq: 1 })
+      .sort({ _id: -1 })
+      .limit(1)
+      .exec();
+    if (latestDocument.length == 0)
+      data = { ...data, seq: 1, voucherCode: "MVC-1" }; // if seq is undefined set initial patientID and seq
     if (latestDocument.length) {
-      const increment = latestDocument[0].seq + 1
-      data = { ...data, voucherCode: "MVC-" + increment, seq: increment }
+      const increment = latestDocument[0].seq + 1;
+      data = { ...data, voucherCode: "MVC-" + increment, seq: increment };
     }
     // //_________COGS___________
     // const medicineResult = await MedicineItems.find({ _id: { $in: req.body.medicineItems.map(item => item.item_id) } })
@@ -145,7 +188,7 @@ exports.createMedicineSale = async (req, res, next) => {
     // )
     // //_________END_OF_COGS___________
 
-    // //first transaction 
+    // //first transaction
     // const fTransaction = new Transaction({
     //   "amount": data.payAmount,
     //   "date": Date.now(),
@@ -202,97 +245,130 @@ exports.createMedicineSale = async (req, res, next) => {
     //   { new: true },
     // )
 
-    data = { ...data, createdBy: createdBy }
+    const patientData = await Patient.find({ _id: data.relatedPatient });
+    console.log(patientData, "patientData");
+    const memLevelRes = await MemberLevel.find({
+      isDeleted: false,
+      isActive: true,
+      type: "TotalAmount",
+    });
+    // console.log(patientData[0].totalAmount, "patientData[0].totalAmount");
+    console.log(memLevelRes, "memLevelRes");
+    console.log(data, "data");
+
+    const filterLevel = memLevelRes.filter(
+      (el) => el.totalAmount <= parseInt(patientData[0].totalAmount)
+    );
+    console.log(filterLevel, "filterLevel");
+
+    const resultUpdate = await Patient.findOneAndUpdate(
+      { _id: data.relatedPatient },
+      {
+        relatedMemberLevel:
+          filterLevel.length === 1
+            ? filterLevel[0]?._id
+            : filterLevel[filterLevel.length - 1]?._id,
+      },
+
+      { new: true }
+    );
+    data = { ...data, createdBy: createdBy };
     if (medicineItems !== undefined) {
       for (const e of medicineItems) {
-        let totalUnit = e.stock - e.qty
-        const result = await MedicineItems.find({ _id: e.item_id, isDeleted: false })
-        const from = result[0].fromUnit
-        const to = result[0].toUnit
-        const currentQty = (from * totalUnit) / to
+        let totalUnit = e.stock - e.qty;
+        const result = await MedicineItems.find({
+          _id: e.item_id,
+          isDeleted: false,
+        });
+        const from = result[0].fromUnit;
+        const to = result[0].toUnit;
+        const currentQty = (from * totalUnit) / to;
         try {
           const result = await MedicineItems.findOneAndUpdate(
             { _id: e.item_id },
             { totalUnit: totalUnit, currentQuantity: currentQty },
-            { new: true },
-          )
+            { new: true }
+          );
         } catch (error) {
-          return res.status(500).send({ error: true, message: error.message })
+          return res.status(500).send({ error: true, message: error.message });
         }
         const logResult = await Log.create({
-          "relatedTreatmentSelection": null,
-          "relatedAppointment": null,
-          "relatedMedicineItems": e.item_id,
-          "currentQty": e.stock,
-          "actualQty": e.actual,
-          "finalQty": totalUnit,
-          "type": "Medicine Sale",
-          "relatedBranch": relatedBranch,
-          "createdBy": createdBy
-        })
+          relatedTreatmentSelection: null,
+          relatedAppointment: null,
+          relatedMedicineItems: e.item_id,
+          currentQty: e.stock,
+          actualQty: e.actual,
+          finalQty: totalUnit,
+          type: "Medicine Sale",
+          relatedBranch: relatedBranch,
+          createdBy: createdBy,
+        });
       }
     }
-    const newMedicineSale = new MedicineSale(data)
-    const medicineSaleResult = await newMedicineSale.save()
+    const newMedicineSale = new MedicineSale(data);
+    const medicineSaleResult = await newMedicineSale.save();
     res.status(200).send({
-      message: 'MedicineSale Transaction success',
+      message: "MedicineSale Transaction success",
       success: true,
-      data: newMedicineSale
+      data: newMedicineSale,
       // fTrans: fTransUpdate,
       // sTrans: secTransResult,
       // accResult: accResult,
       // data: medicineSaleResult
     });
-
   } catch (error) {
     //console.log(error)
-    return res.status(500).send({ "error": true, message: error.message })
+    return res.status(500).send({ error: true, message: error.message });
   }
 };
 
 exports.createMedicineSaleTransaction = async (req, res, next) => {
   try {
-    let objID = ''
-    if (req.body.relatedBank) objID = req.body.relatedBank
-    if (req.body.relatedCash) objID = req.body.relatedCash
+    let objID = "";
+    if (req.body.relatedBank) objID = req.body.relatedBank;
+    if (req.body.relatedCash) objID = req.body.relatedCash;
     //transaction
-    const acc = await Accounting.find({ _id: objID })
+    const acc = await Accounting.find({ _id: objID });
     const accResult = await Accounting.findOneAndUpdate(
       { _id: objID },
       { amount: parseInt(req.body.amount) + parseInt(acc[0].amount) },
-      { new: true },
-    )
+      { new: true }
+    );
 
-    const newMedicineSale = new MedicineSale(req.body)
-    const medicineSaleResult = newMedicineSale.save()
+    const newMedicineSale = new MedicineSale(req.body);
+    const medicineSaleResult = newMedicineSale.save();
     res.status(200).send({
-      message: 'MedicineSale Transaction success',
+      message: "MedicineSale Transaction success",
       success: true,
       fTrans: fTransResult,
       sTrans: secTransResult,
       accResult: accResult,
-      data: medicineSaleResult
+      data: medicineSaleResult,
     });
-
-
   } catch (error) {
-    return res.status(500).send({ "error": true, message: error.message })
+    return res.status(500).send({ error: true, message: error.message });
   }
 };
-
 
 exports.updateMedicineSale = async (req, res, next) => {
   try {
     const result = await MedicineSale.findOneAndUpdate(
       { _id: req.body.id },
       req.body,
-      { new: true },
-    ).populate('relatedPatient relatedTransaction').populate('relatedAppointment').populate('medicineItems.item_id').populate('relatedTreatment').populate('createdBy');
-    if (!result) return res.status(500).send({ error: true, message: 'Query Error!' })
-    if (result === 0) return res.status(500).send({ error: true, message: 'No Records!' })
+      { new: true }
+    )
+      .populate("relatedPatient relatedTransaction")
+      .populate("relatedAppointment")
+      .populate("medicineItems.item_id")
+      .populate("relatedTreatment")
+      .populate("createdBy");
+    if (!result)
+      return res.status(500).send({ error: true, message: "Query Error!" });
+    if (result === 0)
+      return res.status(500).send({ error: true, message: "No Records!" });
     return res.status(200).send({ success: true, data: result });
   } catch (error) {
-    return res.status(500).send({ "error": true, "message": error.message })
+    return res.status(500).send({ error: true, message: error.message });
   }
 };
 
@@ -301,115 +377,154 @@ exports.deleteMedicineSale = async (req, res, next) => {
     const result = await MedicineSale.findOneAndUpdate(
       { _id: req.params.id },
       { isDeleted: true },
-      { new: true },
+      { new: true }
     );
-    return res.status(200).send({ success: true, data: { isDeleted: result.isDeleted } });
+    return res
+      .status(200)
+      .send({ success: true, data: { isDeleted: result.isDeleted } });
   } catch (error) {
-    return res.status(500).send({ "error": true, "message": error.message })
-
+    return res.status(500).send({ error: true, message: error.message });
   }
-}
+};
 
 exports.activateMedicineSale = async (req, res, next) => {
   try {
     const result = await MedicineSale.findOneAndUpdate(
       { _id: req.params.id },
       { isDeleted: false },
-      { new: true },
+      { new: true }
     );
-    return res.status(200).send({ success: true, data: { isDeleted: result.isDeleted } });
+    return res
+      .status(200)
+      .send({ success: true, data: { isDeleted: result.isDeleted } });
   } catch (error) {
-    return res.status(500).send({ "error": true, "message": error.message })
+    return res.status(500).send({ error: true, message: error.message });
   }
 };
 
 exports.createCode = async (req, res, next) => {
-  let data = {}
+  let data = {};
   try {
-    const latestDocument = await MedicineSale.find({}, { seq: 1 }).sort({ _id: -1 }).limit(1).exec();
-    if (latestDocument.length == 0) data = { ...data, seq: 1, voucherCode: "MVC-1" } // if seq is undefined set initial patientID and seq
+    const latestDocument = await MedicineSale.find({}, { seq: 1 })
+      .sort({ _id: -1 })
+      .limit(1)
+      .exec();
+    if (latestDocument.length == 0)
+      data = { ...data, seq: 1, voucherCode: "MVC-1" }; // if seq is undefined set initial patientID and seq
     if (latestDocument.length) {
-      const increment = latestDocument[0].seq + 1
-      data = { ...data, voucherCode: "MVC-" + increment, seq: increment }
+      const increment = latestDocument[0].seq + 1;
+      data = { ...data, voucherCode: "MVC-" + increment, seq: increment };
     }
     return res.status(200).send({
       success: true,
-      data: data
-    })
+      data: data,
+    });
   } catch (err) {
     return res.status(500).send({
       error: true,
-      message: err
-    })
+      message: err,
+    });
   }
-}
+};
 
 exports.filterMedicineSales = async (req, res, next) => {
   try {
-    let query = {}
-    const { start, end } = req.query
-    if (start && end) query.originalDate = { $gte: start, $lte: end }
-    if (Object.keys(query).length === 0) return res.status(404).send({ error: true, message: 'Please Specify A Query To Use This Function' })
-    const result = await MedicineSale.find(query).populate('relatedPatient relatedTransaction').populate('relatedAppointment').populate('medicineItems.item_id').populate('relatedTreatment').populate('createdBy');
-    if (result.length === 0) return res.status(404).send({ error: true, message: "No Record Found!" })
-    res.status(200).send({ success: true, data: result })
+    let query = {};
+    const { start, end } = req.query;
+    if (start && end) query.originalDate = { $gte: start, $lte: end };
+    if (Object.keys(query).length === 0)
+      return res.status(404).send({
+        error: true,
+        message: "Please Specify A Query To Use This Function",
+      });
+    const result = await MedicineSale.find(query)
+      .populate("relatedPatient relatedTransaction")
+      .populate("relatedAppointment")
+      .populate("medicineItems.item_id")
+      .populate("relatedTreatment")
+      .populate("createdBy");
+    if (result.length === 0)
+      return res.status(404).send({ error: true, message: "No Record Found!" });
+    res.status(200).send({ success: true, data: result });
   } catch (err) {
-    return res.status(500).send({ error: true, message: err.message })
+    return res.status(500).send({ error: true, message: err.message });
   }
-}
+};
 
 exports.confirmTransaction = async (req, res, next) => {
   try {
-    //first transaction 
+    //first transaction
     const fTransaction = new Transaction({
-      "amount": req.body.amount,
-      "date": Date.now(),
-      "remark": req.body.remark,
-      "relatedAccounting": req.body.relatedAccounting,
-      "type": "Credit"
-    })
-    const fTransResult = await fTransaction.save()
+      amount: req.body.amount,
+      date: Date.now(),
+      remark: req.body.remark,
+      relatedAccounting: req.body.relatedAccounting,
+      type: "Credit",
+    });
+    const fTransResult = await fTransaction.save();
     //sec transaction
-    const secTransaction = new Transaction(
-      {
-        "amount": req.body.amount,
-        "date": Date.now(),
-        "remark": req.body.remark,
-        "relatedBank": req.body.relatedBank,
-        "relatedCash": req.body.relatedCash,
-        "type": "Debit",
-        "relatedTransaction": fTransResult._id
-      }
-    )
+    const secTransaction = new Transaction({
+      amount: req.body.amount,
+      date: Date.now(),
+      remark: req.body.remark,
+      relatedBank: req.body.relatedBank,
+      relatedCash: req.body.relatedCash,
+      type: "Debit",
+      relatedTransaction: fTransResult._id,
+    });
     const secTransResult = await secTransaction.save();
-    return res.status(200).send({ success: true, fTransResult: fTransResult, secTransResult: secTransResult })
+    return res.status(200).send({
+      success: true,
+      fTransResult: fTransResult,
+      secTransResult: secTransResult,
+    });
   } catch (error) {
-    return res.status(500).send({ error: true, message: err.message })
+    return res.status(500).send({ error: true, message: err.message });
   }
-}
+};
 
 exports.MedicineSaleFilter = async (req, res) => {
-  let query = { relatedBank: { $exists: true }, isDeleted: false }
+  let query = { relatedBank: { $exists: true }, isDeleted: false };
   try {
-    const { start, end, createdBy } = req.query
-    if (start && end) query.createdAt = { $gte: start, $lt: end }
-    if (createdBy) query.createdBy = createdBy
-    const bankResult = await MedicineSale.find(query).populate('relatedBank relatedTreatment relatedPatient relatedAppointment medicineItems.item_id relatedCash relatedAccount relatedTransaction').populate('createdBy', 'givenName')
+    const { start, end, createdBy } = req.query;
+    if (start && end) query.createdAt = { $gte: start, $lt: end };
+    if (createdBy) query.createdBy = createdBy;
+    const bankResult = await MedicineSale.find(query)
+      .populate(
+        "relatedBank relatedTreatment relatedPatient relatedAppointment medicineItems.item_id relatedCash relatedAccount relatedTransaction"
+      )
+      .populate("createdBy", "givenName");
     const { relatedBank, ...query2 } = query;
     query2.relatedCash = { $exists: true };
-    const cashResult = await MedicineSale.find(query2).populate('relatedBank relatedTreatment relatedPatient relatedAppointment medicineItems.item_id relatedCash relatedAccount relatedTransaction').populate('createdBy', 'givenName')
-    const BankNames = bankResult.reduce((result, { relatedBank, totalAmount }) => {
-      const { name } = relatedBank;
-      result[name] = (result[name] || 0) + totalAmount;
-      return result;
-    }, {});
-    const CashNames = cashResult.reduce((result, { relatedCash, totalAmount }) => {
-      const { name } = relatedCash;
-      result[name] = (result[name] || 0) + totalAmount;
-      return result;
-    }, {});
-    const BankTotal = bankResult.reduce((total, sale) => total + sale.totalAmount, 0);
-    const CashTotal = cashResult.reduce((total, sale) => total + sale.totalAmount, 0);
+    const cashResult = await MedicineSale.find(query2)
+      .populate(
+        "relatedBank relatedTreatment relatedPatient relatedAppointment medicineItems.item_id relatedCash relatedAccount relatedTransaction"
+      )
+      .populate("createdBy", "givenName");
+    const BankNames = bankResult.reduce(
+      (result, { relatedBank, totalAmount }) => {
+        const { name } = relatedBank;
+        result[name] = (result[name] || 0) + totalAmount;
+        return result;
+      },
+      {}
+    );
+    const CashNames = cashResult.reduce(
+      (result, { relatedCash, totalAmount }) => {
+        const { name } = relatedCash;
+        result[name] = (result[name] || 0) + totalAmount;
+        return result;
+      },
+      {}
+    );
+    const BankTotal = bankResult.reduce(
+      (total, sale) => total + sale.totalAmount,
+      0
+    );
+    const CashTotal = cashResult.reduce(
+      (total, sale) => total + sale.totalAmount,
+      0
+    );
 
     return res.status(200).send({
       success: true,
@@ -419,10 +534,10 @@ exports.MedicineSaleFilter = async (req, res) => {
         BankNames: BankNames,
         CashNames: CashNames,
         BankTotal: BankTotal,
-        CashTotal: CashTotal
-      }
+        CashTotal: CashTotal,
+      },
     });
   } catch (error) {
-    return res.status(500).send({ error: true, message: error.message })
+    return res.status(500).send({ error: true, message: error.message });
   }
-}
+};

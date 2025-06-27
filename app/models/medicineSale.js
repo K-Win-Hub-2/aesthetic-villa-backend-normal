@@ -1,98 +1,103 @@
-'use strict';
+"use strict";
 
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 mongoose.promise = global.Promise;
 const Schema = mongoose.Schema;
 
-
 let MedicineSaleSchema = new Schema({
   voucherCode: {
-    type:String
+    type: String,
   },
   createdBy: {
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'Users'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
   },
   createdAt: {
-    type:Date
+    type: Date,
   },
   relatedTreatment: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'Treatments'
+    ref: "Treatments",
   },
   relatedPatient: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'Patients',
+    ref: "Patients",
     required: true,
   },
   relatedAppointment: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'Appointments'
+    ref: "Appointments",
   },
   remark: {
-    type:String,
+    type: String,
   },
   totalAmount: {
-    type:Number,
+    type: Number,
   },
   discount: {
-    type: Number
+    type: Number,
   },
   grandTotal: {
-    type:Number
+    type: Number,
   },
   payAmount: {
-    type:Number
+    type: Number,
   },
   change: {
-    type:Number
+    type: Number,
   },
   paymentMethod: {
-    type:String,
-    enum:["Cash Down","Bank Transition"],
+    type: String,
+    enum: ["Cash Down", "Bank Transition"],
   },
   relatedBank: {
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'AccountingLists'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "AccountingLists",
   },
-  medicineItems: [{
-    item_id:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'MedicineItems'
+  medicineItems: [
+    {
+      item_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "MedicineItems",
+      },
+      quantity: Number,
+      discount: Number,
     },
-    quantity:Number,
-    discount:Number
-  }],
+  ],
   isDeleted: {
-    type:Boolean,
-    required:true,
-    default:false
+    type: Boolean,
+    required: true,
+    default: false,
   },
-  seq:{
-    type:Number
+  seq: {
+    type: Number,
   },
   relatedCash: {
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'AccountingLists'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "AccountingLists",
   },
   relatedAccount: {
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'AccountingLists'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "AccountingLists",
   },
   createdBy: {
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'Users'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
   },
-  relatedTransaction:{
-    type:[mongoose.Schema.Types.ObjectId],
-    ref:'Transactions'
+  relatedTransaction: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Transactions",
   },
   relatedBranch: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Branches'
+    ref: "Branches",
+  },
+  isMemberDiscount: {
+    type: Boolean,
+    default: false,
   },
 });
 
-module.exports = mongoose.model('MedicineSales', MedicineSaleSchema);
+module.exports = mongoose.model("MedicineSales", MedicineSaleSchema);
 
 //Author: Kyaw Zaw Lwin
