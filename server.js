@@ -3,14 +3,16 @@ require("dotenv").config();
 const path = require("path");
 const cronitor = require("cronitor")("bb06d5c8745f45f2a9fc62755b7414ea");
 const createIndexs = require("./dbIndexes").createIndex;
+const fs = require("fs");
+const https = require("https");
 const express = require("express"),
   bodyParser = require("body-parser"),
   cron = require("node-cron"),
   mongoose = require("mongoose"),
   config = require("./config/db"),
   app = express(),
-  server = require("http").Server(app),
-  port = process.env.PORT;
+  server = https.createServer(options, app);
+port = process.env.PORT;
 app.use(cors({ origin: "*" }));
 
 const userUtil = require("./app/lib/userUtil");
@@ -220,6 +222,15 @@ if (mongoose.connection.readyState != 1) {
 mongoose.plugin((schema) => {
   schema.options.usePushEach = true;
 });
+
+const options = {
+  key: fs.readFileSync(
+    "/etc/letsencrypt/live/backend.avclinicmm.com/privkey.pem"
+  ),
+  cert: fs.readFileSync(
+    "/etc/letsencrypt/live/backend.avclinicmm.com/fullchain.pem"
+  ),
+};
 
 //static files
 app.use("/static", express.static(path.join(__dirname, "uploads")));
